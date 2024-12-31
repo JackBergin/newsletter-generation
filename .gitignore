@@ -6,3 +6,5 @@ test.py
 .vscode/
 .next/
 app.log
+.env.production
+.env.local

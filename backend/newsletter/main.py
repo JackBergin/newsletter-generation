@@ -1,14 +1,11 @@
-import os
 import uvicorn
-from dotenv import load_dotenv
-
-app = "newsletter.api.app:app"
-
-load_dotenv()
-SERVE_URL = os.getenv("SERVE_URL")
-
-def server():
-    uvicorn.run(app, host=SERVE_URL, port=8080)
+from .api.app import app
+import os
 
 if __name__ == "__main__":
-    server()
+    uvicorn.run(
+        "backend.newsletter.api.app:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", 8000)),
+        reload=False  # Set to True for development
+    )

@@ -21,18 +21,18 @@ This project combines modern web technologies and AI to automatically generate n
 - AI/ML integrations for content processing
 
 ## Project Structure
-├── frontend/ # Next.js frontend application
-│ ├── components/ # Reusable React components
-│ ├── pages/ # Next.js pages and routing
-│ └── styles/ # CSS and styling files
-│
-├── backend/ # FastAPI backend application
-│ ├── newsletter/ # Core newsletter generation logic
-│ │ ├── api/ # API endpoints and routing
-│ │ ├── utils/ # Utility functions and helpers
-│ │ └── main.py # Application entry point
-│ └── tests/ # Backend test suite
-
+  ├── frontend/ # Next.js frontend application
+  │ ├── components/ # Reusable React components
+  │ ├── pages/ # Next.js pages and routing
+  │ └── styles/ # CSS and styling files
+  │
+  ├── backend/ # FastAPI backend application
+  │ ├── newsletter/ # Core newsletter generation logic
+  │ │ ├── api/ # API endpoints and routing
+  │ │ ├── utils/ # Utility functions and helpers
+  │ │ └── main.py # Application entry point
+  │ └── tests/ # Backend test suite
+  
 
 
 ## Features

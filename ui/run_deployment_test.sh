@@ -1,1 +1,0 @@
-ngrok http --url=mink-settling-condor.ngrok-free.app 3000

@@ -30,7 +30,7 @@ class FormatVideoSummaryUtils():
         
         for dp in self.transcript:
             clean_text += str(dp['text']) + ' '
-            timestamp = str(datetime.fromtimestamp(dp['start'], datetime.UTC).strftime('%H:%M:%S'))
+            timestamp = str(datetime.utcfromtimestamp(dp['start']).strftime('%H:%M:%S'))
             raw_transcript += f"[{timestamp}] {dp['text']}\n"
         
         # Save raw transcript
@@ -121,3 +121,80 @@ Format the report in markdown with the following sections:
         """Save summary to markdown file"""
         with open(self.md_path, 'w', encoding='utf-8') as file:
             file.write(self.summary)
+
+    def md_to_html(self):
+        """Convert markdown to HTML with navigation"""
+        with open(self.md_path, 'r', encoding='utf-8') as md_file:
+            md_content = md_file.read()
+            
+        html_content = markdown.markdown(md_content)
+        
+        # Create daily index if it doesn't exist
+        self.create_daily_index()
+        
+        html_template = f'''
+        <html>
+        <head>
+            <title>{self.file_name}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; }}
+                nav {{ margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; }}
+                nav a {{ margin-right: 15px; text-decoration: none; color: #007bff; }}
+                nav a:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <nav>
+                <a href="/index.html">Home</a>
+                <a href="index.html">Today's Summaries</a>
+                <a href="{os.path.basename(self.transcript_path)}">View Transcript</a>
+            </nav>
+            {html_content}
+        </body>
+        </html>
+        '''
+        
+        with open(self.html_path, 'w', encoding='utf-8') as f:
+            f.write(html_template)
+
+    def create_daily_index(self):
+        """Create index.html for daily summaries"""
+        index_path = os.path.join(self.daily_path, 'index.html')
+        
+        # Get all HTML files except transcripts and index
+        html_files = [f for f in os.listdir(self.daily_path) 
+                     if f.endswith('.html') and not f.endswith('_transcript.html') 
+                     and f != 'index.html']
+        
+        content = f'''
+        <html>
+        <head>
+            <title>YouTube Summaries - {datetime.now().strftime('%Y-%m-%d')}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; }}
+                nav {{ margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; }}
+                nav a {{ margin-right: 15px; text-decoration: none; color: #007bff; }}
+                nav a:hover {{ text-decoration: underline; }}
+                .summary-list {{ list-style: none; padding: 0; }}
+                .summary-list li {{ margin-bottom: 10px; }}
+            </style>
+        </head>
+        <body>
+            <nav>
+                <a href="/index.html">Home</a>
+            </nav>
+            <h1>YouTube Summaries - {datetime.now().strftime('%Y-%m-%d')}</h1>
+            <ul class="summary-list">
+        '''
+        
+        for html_file in sorted(html_files):
+            content += f'<li><a href="{html_file}">{html_file[:-5]}</a></li>\n'
+        
+        content += '''
+            </ul>
+        </body>
+        </html>
+        '''
+        
+        with open(index_path, 'w', encoding='utf-8') as f:
+            f.write(content)

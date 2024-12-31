@@ -6,22 +6,29 @@ import os
 load_dotenv()
 
 class RedditScraperUtils:
-    def __init__(self, subreddits):
+    def __init__(self):
         # Initialize Reddit client
         self.reddit = praw.Reddit(
             client_id=os.getenv('REDDIT_CLIENT_ID'),
             client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
-            user_agent=os.getenv('REDDIT_USER_AGENT')
+            user_agent=os.getenv('REDDIT_USER_AGENT', 'CryptoNewsScraper v1.0')
         )
         
         # Subreddits to monitor
-        self.subreddits = [subreddits]
+        self.crypto_subreddits = [
+            'CryptoCurrency',
+            'CryptoMarkets',
+            'XRP',
+            'Ripple',
+            'CryptoTechnology',
+            'BitcoinMarkets'
+        ]
 
     def get_top_posts(self, time_filter='day', limit=10):
         """Get top posts from each subreddit"""
         all_posts = []
         
-        for subreddit_name in self.subreddits:
+        for subreddit_name in self.crypto_subreddits:
             try:
                 subreddit = self.reddit.subreddit(subreddit_name)
                 top_posts = subreddit.top(time_filter=time_filter, limit=limit)
@@ -49,7 +56,7 @@ class RedditScraperUtils:
         """Get hot posts from each subreddit"""
         all_posts = []
         
-        for subreddit_name in self.subreddits:
+        for subreddit_name in self.crypto_subreddits:
             try:
                 subreddit = self.reddit.subreddit(subreddit_name)
                 hot_posts = subreddit.hot(limit=limit)

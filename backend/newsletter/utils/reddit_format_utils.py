@@ -1,16 +1,18 @@
 import os
 from datetime import datetime
+import markdown
 from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class RedditFormatUtils:
-    def __init__(self, posts, base_path="./generated/reddit", file_name="reddit_summary"):
+    def __init__(self, posts, base_path="./generated/reddit"):
         self.posts = posts
         self.today = datetime.now().strftime('%Y%m%d')
         self.daily_path = os.path.join(base_path, self.today)
-        self.md_path = os.path.join(self.daily_path, f"{file_name}.md")
+        self.md_path = os.path.join(self.daily_path, "reddit_summary.md")
+        self.html_path = os.path.join(self.daily_path, "reddit_summary.html")
         
         # Create directories if they don't exist
         os.makedirs(self.daily_path, exist_ok=True)
@@ -97,3 +99,68 @@ Format the report in markdown:
         raw_digest_path = os.path.join(self.daily_path, "reddit_raw_digest.md")
         with open(raw_digest_path, 'w', encoding='utf-8') as f:
             f.write(self.raw_digest)
+            
+        # Convert to HTML
+        self.convert_to_html()
+
+    def convert_to_html(self):
+        """Convert markdown files to HTML"""
+        # Convert summary
+        with open(self.md_path, 'r', encoding='utf-8') as md_file:
+            md_content = md_file.read()
+            
+        html_content = markdown.markdown(md_content)
+        
+        html_template = f'''
+        <html>
+        <head>
+            <title>Reddit Crypto Summary - {datetime.now().strftime('%Y-%m-%d')}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; }}
+                nav {{ margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; }}
+                nav a {{ margin-right: 15px; text-decoration: none; color: #007bff; }}
+                nav a:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <nav>
+                <a href="/index.html">Home</a>
+                <a href="reddit_raw_digest.html">View Raw Digest</a>
+            </nav>
+            {html_content}
+        </body>
+        </html>
+        '''
+        
+        with open(self.html_path, 'w', encoding='utf-8') as f:
+            f.write(html_template)
+            
+        # Convert raw digest
+        with open(os.path.join(self.daily_path, "reddit_raw_digest.md"), 'r', encoding='utf-8') as md_file:
+            raw_digest_content = md_file.read()
+            
+        raw_html_content = markdown.markdown(raw_digest_content)
+        
+        raw_html_template = f'''
+        <html>
+        <head>
+            <title>Reddit Crypto Raw Digest - {datetime.now().strftime('%Y-%m-%d')}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; }}
+                nav {{ margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; }}
+                nav a {{ margin-right: 15px; text-decoration: none; color: #007bff; }}
+                nav a:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <nav>
+                <a href="/index.html">Home</a>
+                <a href="reddit_summary.html">View Summary</a>
+            </nav>
+            {raw_html_content}
+        </body>
+        </html>
+        '''
+        
+        with open(os.path.join(self.daily_path, "reddit_raw_digest.html"), 'w', encoding='utf-8') as f:
+            f.write(raw_html_template) 

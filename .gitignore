@@ -3,4 +3,4 @@ __pycache__/
 .env
 sandbox/
 test.py
-
+.vscode/

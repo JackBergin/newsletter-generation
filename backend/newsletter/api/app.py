@@ -3,13 +3,18 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from ..utils.api_utils import ApiUtils
 import os
+from dotenv import load_dotenv
 
 app = FastAPI()
 
-# Add CORS middleware
+# Add CORS middleware with specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://sandbox01.ddns.net:3000",
+        "https://sandbox01.ddns.net:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

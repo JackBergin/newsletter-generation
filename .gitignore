@@ -4,3 +4,5 @@ __pycache__/
 sandbox/
 test.py
 .vscode/
+.next/
+app.log

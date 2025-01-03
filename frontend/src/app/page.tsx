@@ -1,7 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type ContentType = 'reddit' | 'youtube';
+
+declare global {
+  interface Window {
+    adsbygoogle: any;
+  }
+}
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
@@ -9,12 +15,25 @@ export default function Home() {
   const [inputValue, setInputValue] = useState('');
   const [customSummary, setCustomSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPrerollAd, setShowPrerollAd] = useState(false);
+  const footerAdRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
     if (localStorage.theme === 'dark' || 
         (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       setDarkMode(true);
       document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Initialize footer ad
+    try {
+      if (footerAdRef.current) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (err) {
+      console.error('Error loading footer ad:', err);
     }
   }, []);
 
@@ -31,7 +50,15 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Show pre-roll ad before generating newsletter
+    setShowPrerollAd(true);
+    
+    // Wait for ad to be displayed
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
     setIsLoading(true);
+    setShowPrerollAd(false);
 
     try {
       const response = await fetch('/api/generate', {
@@ -66,46 +93,46 @@ export default function Home() {
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-white dark:bg-gray-900 transition-colors duration-200">
-      <main className="flex flex-col gap-8 row-start-2 items-center text-center">
-        <h1 className="text-4xl font-bold text-gray-500 dark:text-white mb-4">
-          Crypto Market Intelligence Hub
+    <div className="grid grid-rows-[20px_1fr_auto] items-center justify-items-center min-h-screen p-4 sm:p-8 pb-16 sm:pb-20 gap-8 sm:gap-16 font-[family-name:var(--font-geist-sans)] bg-white dark:bg-gray-900 transition-colors duration-200">
+      <main className="flex flex-col gap-6 sm:gap-8 row-start-2 items-center text-center w-full max-w-2xl px-2 sm:px-0">
+        <h1 className="text-2xl sm:text-4xl font-bold text-gray-500 dark:text-white mb-2 sm:mb-4">
+          Media Newsletter & Summary Generator
         </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row mb-8">
+        <div className="flex gap-4 items-center mb-4 sm:mb-8">
           <button
             onClick={toggleDarkMode}
-            className="rounded-full border border-solid text-blue-500 border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-800 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+            className="rounded-full border border-solid text-blue-500 border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-800 text-sm sm:text-base h-8 sm:h-10 px-3 sm:px-4"
           >
-            {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+            {darkMode ? '🌞' : '🌙'} <span className="hidden sm:inline ml-1">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
         </div>
 
-        <div className="w-full max-w-2xl p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div className="flex gap-4 mb-6">
+        <div className="w-full p-4 sm:p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6">
             <button
               onClick={() => setContentType('youtube')}
-              className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+              className={`flex-1 py-2 px-2 sm:px-4 rounded-lg transition-colors text-sm sm:text-base ${
                 contentType === 'youtube'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
             >
-              YouTube Video
+              YouTube
             </button>
             <button
               onClick={() => setContentType('reddit')}
-              className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+              className={`flex-1 py-2 px-2 sm:px-4 rounded-lg transition-colors text-sm sm:text-base ${
                 contentType === 'reddit'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
             >
-              Reddit Channel
+              Reddit
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
               <input
                 type="text"
@@ -147,15 +174,45 @@ export default function Home() {
           </form>
         </div>
 
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-4">
           <p>Generate a detailed summary from your chosen source.</p>
-          <p>Add custom summary information to enhance the newsletter.</p>
-          <p>The newsletter will be downloaded as a markdown file.</p>
+          <p className="mt-1">Add custom summary information to enhance the newsletter.</p>
+          <p className="mt-1">The newsletter will be downloaded as a markdown file.</p>
         </div>
       </main>
 
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-600 dark:text-gray-400">
-        <p>Powered by AI for optimal summary intelligence</p>
+      {showPrerollAd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-4 rounded-lg w-full max-w-sm sm:max-w-md">
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', minHeight: '250px' }}
+              data-ad-client="YOUR-ADSENSE-CLIENT-ID"
+              data-ad-slot="YOUR-AD-SLOT-ID"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            />
+            <p className="text-center mt-4 text-sm sm:text-base">Please wait while we prepare your newsletter...</p>
+          </div>
+        </div>
+      )}
+
+      <footer className="row-start-3 w-full max-w-4xl mx-auto px-4">
+        <div className="mb-4 sm:mb-6">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', minHeight: '100px' }}
+            data-ad-client="YOUR-ADSENSE-CLIENT-ID"
+            data-ad-slot="YOUR-FOOTER-AD-SLOT-ID"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+            ref={footerAdRef}
+          />
+        </div>
+        
+        <div className="flex gap-4 sm:gap-6 flex-wrap items-center justify-center text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <p>Powered by AI for optimal summary intelligence</p>
+        </div>
       </footer>
     </div>
   );

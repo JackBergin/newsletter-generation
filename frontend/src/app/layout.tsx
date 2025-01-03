@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Crypto Market Intelligence Hub',
-  description: 'Generate AI-powered crypto market intelligence newsletters',
+  title: 'Media Newsletter & Summary Generator',
+  description: 'Generate AI-powered newsletters & summaries',
 }
 
 export default function RootLayout({

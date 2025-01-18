@@ -16,7 +16,6 @@ export default function Home() {
   const [inputValue, setInputValue] = useState('');
   const [customSummary, setCustomSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showPrerollAd, setShowPrerollAd] = useState(false);
   const footerAdRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
@@ -51,36 +50,34 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Show pre-roll ad before generating newsletter
-    setShowPrerollAd(true);
-    
-    // Wait for ad to be displayed
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    
     setIsLoading(true);
-    setShowPrerollAd(false);
 
     try {
-      const response = await fetch('/api/generate', {
+      const endpoint = contentType === 'youtube' 
+        ? '/api/generate/youtube'
+        : '/api/generate/reddit';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: contentType,
           input: inputValue,
           customSummary: customSummary,
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate newsletter');
+      if (!response.ok) {
+        //const errorData = await response.json();
+        throw new Error('Failed to generate newsletter');
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `crypto-newsletter-${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `${contentType}-summary-${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -201,22 +198,6 @@ export default function Home() {
             <p className="mt-1">The newsletter will be downloaded as a markdown file.</p>
           </div>
         </main>
-
-        {showPrerollAd && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white p-4 rounded-lg w-full max-w-sm sm:max-w-md">
-              <ins
-                className="adsbygoogle"
-                style={{ display: 'block', minHeight: '250px' }}
-                data-ad-client="YOUR-ADSENSE-CLIENT-ID"
-                data-ad-slot="YOUR-AD-SLOT-ID"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              />
-              <p className="text-center mt-4 text-sm sm:text-base">Please wait while we prepare your newsletter...</p>
-            </div>
-          </div>
-        )}
 
         <footer className="row-start-3 w-full max-w-4xl mx-auto px-4">
           <div className="mb-4 sm:mb-6">

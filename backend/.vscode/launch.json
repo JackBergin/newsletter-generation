@@ -1,22 +1,65 @@
 {
-    "version": "0.2.0",
+    "version": "1.0.0",
     "configurations": [
         {
-            "name": "FastAPI",
+            "name": "Main API",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
             "args": [
                 "newsletter.api.app:app",
-                "--reload",
                 "--port",
                 "8000"
             ],
             "jinja": true,
             "justMyCode": true,
             "env": {
+                "PYTHONPATH": "${workspaceFolder}/newsletter"
+            },
+            "stopOnEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: All Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "test/"
+            ],
+            "env": {
                 "PYTHONPATH": "${workspaceFolder}"
-            }
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Current Test File",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "${file}"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Test API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "test/test_api.py"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal"
         }
     ]
 } 
